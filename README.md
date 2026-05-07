@@ -1,142 +1,254 @@
-## **Note of deprecation**
+#!/usr/bin/env bash
 
-Thank you for developing with Llama models. As part of the Llama 3.1 release, we’ve consolidated GitHub repos and added some additional repos as we’ve expanded Llama’s functionality into being an e2e Llama Stack. Please use the following repos going forward:
-- [llama-models](https://github.com/meta-llama/llama-models) - Central repo for the foundation models including basic utilities, model cards, license and use policies
-- [PurpleLlama](https://github.com/meta-llama/PurpleLlama) - Key component of Llama Stack focusing on safety risks and inference time mitigations 
-- [llama-toolchain](https://github.com/meta-llama/llama-toolchain) - Model development (inference/fine-tuning/safety shields/synthetic data generation) interfaces and canonical implementations
-- [llama-agentic-system](https://github.com/meta-llama/llama-agentic-system) - E2E standalone Llama Stack system, along with opinionated underlying interface, that enables creation of agentic applications
-- [llama-cookbook](https://github.com/meta-llama/llama-recipes) - Community driven scripts and integrations
+# =========================================================
+# AURA TALY BETA - LLAMA UNIFIED STACK INSTALLER
+# Meta Llama 2 / 3.1 / 3.2 / 3.3 / 4
+# Auto Downloader + GitHub Unified Infrastructure
+# =========================================================
 
-If you have any questions, please feel free to file an issue on any of the above repos and we will do our best to respond in a timely manner. 
+set -e
 
-Thank you!
+clear
 
+echo "=================================================="
+echo "      AURA TALY BETA - LLAMA STACK CORE"
+echo "=================================================="
 
-# (Deprecated) Llama 2
+ROOT_DIR="$HOME/aura-llama-stack"
+MODELS_DIR="$ROOT_DIR/models"
+REPOS_DIR="$ROOT_DIR/repos"
+LOGS_DIR="$ROOT_DIR/logs"
 
-We are unlocking the power of large language models. Llama 2 is now accessible to individuals, creators, researchers, and businesses of all sizes so that they can experiment, innovate, and scale their ideas responsibly. 
+mkdir -p "$MODELS_DIR"
+mkdir -p "$REPOS_DIR"
+mkdir -p "$LOGS_DIR"
 
-This release includes model weights and starting code for pre-trained and fine-tuned Llama language models — ranging from 7B to 70B parameters.
+echo "[+] Installing dependencies..."
 
-This repository is intended as a minimal example to load [Llama 2](https://ai.meta.com/research/publications/llama-2-open-foundation-and-fine-tuned-chat-models/) models and run inference. For more detailed examples leveraging Hugging Face, see [llama-cookbook](https://github.com/facebookresearch/llama-recipes/).
+if command -v apt >/dev/null 2>&1; then
+    sudo apt update
+    sudo apt install -y \
+        git wget curl aria2 python3 python3-pip \
+        python3-venv unzip tar jq build-essential \
+        md5sum tmux htop
+fi
 
-## Updates post-launch
+echo "[+] Creating Python virtual environment..."
 
-See [UPDATES.md](UPDATES.md). Also for a running list of frequently asked questions, see [here](https://ai.meta.com/llama/faq/).
+python3 -m venv "$ROOT_DIR/venv"
 
-## Download
+source "$ROOT_DIR/venv/bin/activate"
 
-In order to download the model weights and tokenizer, please visit the [Meta website](https://ai.meta.com/resources/models-and-libraries/llama-downloads/) and accept our License.
+pip install --upgrade pip setuptools wheel
 
-Once your request is approved, you will receive a signed URL over email. Then run the download.sh script, passing the URL provided when prompted to start the download.
+echo "[+] Installing Llama ecosystem..."
 
-Pre-requisites: Make sure you have `wget` and `md5sum` installed. Then run the script: `./download.sh`.
+pip install -U \
+    torch torchvision torchaudio \
+    transformers accelerate sentencepiece \
+    llama-stack \
+    huggingface_hub \
+    safetensors \
+    bitsandbytes \
+    einops \
+    gradio \
+    fastapi \
+    uvicorn
 
-Keep in mind that the links expire after 24 hours and a certain amount of downloads. If you start seeing errors such as `403: Forbidden`, you can always re-request a link.
+echo "[+] Cloning official Meta repositories..."
 
-### Access to Hugging Face
+cd "$REPOS_DIR"
 
-We are also providing downloads on [Hugging Face](https://huggingface.co/meta-llama). You can request access to the models by acknowledging the license and filling the form in the model card of a repo. After doing so, you should get access to all the Llama models of a version (Code Llama, Llama 2, or Llama Guard) within 1 hour.
+REPOS=(
+"https://github.com/meta-llama/llama-models.git"
+"https://github.com/meta-llama/PurpleLlama.git"
+"https://github.com/meta-llama/llama-toolchain.git"
+"https://github.com/meta-llama/llama-agentic-system.git"
+"https://github.com/meta-llama/llama-recipes.git"
+)
 
-## Quick Start
+for repo in "${REPOS[@]}"; do
+    NAME=$(basename "$repo" .git)
 
-You can follow the steps below to quickly get up and running with Llama 2 models. These steps will let you run quick inference locally. For more examples, see the [Llama 2 cookbook repository](https://github.com/facebookresearch/llama-recipes). 
+    if [ ! -d "$NAME" ]; then
+        git clone "$repo"
+    else
+        cd "$NAME"
+        git pull
+        cd ..
+    fi
+done
 
-1. In a conda env with PyTorch / CUDA available clone and download this repository.
+echo "[+] Initializing Llama Stack..."
 
-2. In the top-level directory run:
-    ```bash
-    pip install -e .
-    ```
-3. Visit the [Meta website](https://ai.meta.com/resources/models-and-libraries/llama-downloads/) and register to download the model/s.
+llama stack build || true
 
-4. Once registered, you will get an email with a URL to download the models. You will need this URL when you run the download.sh script.
+echo "[+] Available models:"
+llama model list --show-all || true
 
-5. Once you get the email, navigate to your downloaded llama repository and run the download.sh script. 
-    - Make sure to grant execution permissions to the download.sh script
-    - During this process, you will be prompted to enter the URL from the email. 
-    - Do not use the “Copy Link” option but rather make sure to manually copy the link from the email.
+echo
+echo "=================================================="
+echo "Paste ALL your signed Meta URLs below."
+echo "Type DONE when finished."
+echo "=================================================="
+echo
 
-6. Once the model/s you want have been downloaded, you can run the model locally using the command below:
-```bash
-torchrun --nproc_per_node 1 example_chat_completion.py \
-    --ckpt_dir llama-2-7b-chat/ \
-    --tokenizer_path tokenizer.model \
-    --max_seq_len 512 --max_batch_size 6
-```
-**Note**
-- Replace  `llama-2-7b-chat/` with the path to your checkpoint directory and `tokenizer.model` with the path to your tokenizer model.
-- The `–nproc_per_node` should be set to the [MP](#inference) value for the model you are using.
-- Adjust the `max_seq_len` and `max_batch_size` parameters as needed.
-- This example runs the [example_chat_completion.py](example_chat_completion.py) found in this repository but you can change that to a different .py file.
+URLS=()
 
-## Inference
+while true; do
+    read -p "Signed URL: " URL
 
-Different models require different model-parallel (MP) values:
+    if [[ "$URL" == "DONE" ]]; then
+        break
+    fi
 
-|  Model | MP |
-|--------|----|
-| 7B     | 1  |
-| 13B    | 2  |
-| 70B    | 8  |
+    URLS+=("$URL")
+done
 
-All models support sequence length up to 4096 tokens, but we pre-allocate the cache according to `max_seq_len` and `max_batch_size` values. So set those according to your hardware.
+echo "[+] Starting automated downloads..."
 
-### Pretrained Models
+cd "$MODELS_DIR"
 
-These models are not finetuned for chat or Q&A. They should be prompted so that the expected answer is the natural continuation of the prompt.
+download_model () {
 
-See `example_text_completion.py` for some examples. To illustrate, see the command below to run it with the llama-2-7b model (`nproc_per_node` needs to be set to the `MP` value):
+    URL=$1
 
-```
-torchrun --nproc_per_node 1 example_text_completion.py \
-    --ckpt_dir llama-2-7b/ \
-    --tokenizer_path tokenizer.model \
-    --max_seq_len 128 --max_batch_size 4
-```
+    FILE_NAME=$(echo "$URL" | cut -d'?' -f1 | awk -F/ '{print $NF}')
 
-### Fine-tuned Chat Models
+    if [[ "$FILE_NAME" == "*" ]]; then
+        FILE_NAME="llama_model_$(date +%s).tar"
+    fi
 
-The fine-tuned models were trained for dialogue applications. To get the expected features and performance for them, a specific formatting defined in [`chat_completion`](https://github.com/facebookresearch/llama/blob/main/llama/generation.py#L212)
-needs to be followed, including the `INST` and `<<SYS>>` tags, `BOS` and `EOS` tokens, and the whitespaces and breaklines in between (we recommend calling `strip()` on inputs to avoid double-spaces).
+    echo "[+] Downloading: $FILE_NAME"
 
-You can also deploy additional classifiers for filtering out inputs and outputs that are deemed unsafe. See the llama-cookbook repo for [an example](https://github.com/facebookresearch/llama-recipes/blob/main/examples/inference.py) of how to add a safety checker to the inputs and outputs of your inference code.
+    aria2c \
+        -x16 \
+        -s16 \
+        -k1M \
+        --continue=true \
+        --auto-file-renaming=false \
+        -d "$MODELS_DIR" \
+        -o "$FILE_NAME" \
+        "$URL"
 
-Examples using llama-2-7b-chat:
+    echo "[+] Finished: $FILE_NAME"
+}
 
-```
-torchrun --nproc_per_node 1 example_chat_completion.py \
-    --ckpt_dir llama-2-7b-chat/ \
-    --tokenizer_path tokenizer.model \
-    --max_seq_len 512 --max_batch_size 6
-```
+for url in "${URLS[@]}"; do
+    download_model "$url"
+done
 
-Llama 2 is a new technology that carries potential risks with use. Testing conducted to date has not — and could not — cover all scenarios.
-In order to help developers address these risks, we have created the [Responsible Use Guide](Responsible-Use-Guide.pdf). More details can be found in our research paper as well.
+echo "[+] Organizing model folders..."
 
-## Issues
+mkdir -p \
+    "$MODELS_DIR/Llama2" \
+    "$MODELS_DIR/Llama3_1" \
+    "$MODELS_DIR/Llama3_2" \
+    "$MODELS_DIR/Llama3_3" \
+    "$MODELS_DIR/Llama4"
 
-Please report any software “bug”, or other problems with the models through one of the following means:
-- Reporting issues with the model: [github.com/facebookresearch/llama](http://github.com/facebookresearch/llama)
-- Reporting risky content generated by the model: [developers.facebook.com/llama_output_feedback](http://developers.facebook.com/llama_output_feedback)
-- Reporting bugs and security concerns: [facebook.com/whitehat/info](http://facebook.com/whitehat/info)
+find . -iname "*llama2*" -exec mv {} "$MODELS_DIR/Llama2/" \; || true
+find . -iname "*3.1*" -exec mv {} "$MODELS_DIR/Llama3_1/" \; || true
+find . -iname "*3.2*" -exec mv {} "$MODELS_DIR/Llama3_2/" \; || true
+find . -iname "*3.3*" -exec mv {} "$MODELS_DIR/Llama3_3/" \; || true
+find . -iname "*4*" -exec mv {} "$MODELS_DIR/Llama4/" \; || true
 
-## Model Card
-See [MODEL_CARD.md](MODEL_CARD.md).
+echo "[+] Creating inference launcher..."
 
-## License
+cat > "$ROOT_DIR/run_llama.sh" << 'EOF'
+#!/usr/bin/env bash
 
-Our model and weights are licensed for both researchers and commercial entities, upholding the principles of openness. Our mission is to empower individuals, and industry through this opportunity, while fostering an environment of discovery and ethical AI advancements. 
+source ~/aura-llama-stack/venv/bin/activate
 
-See the [LICENSE](LICENSE) file, as well as our accompanying [Acceptable Use Policy](USE_POLICY.md)
+MODEL_PATH=$1
 
-## References
+python3 << PYTHON
 
-1. [Research Paper](https://ai.meta.com/research/publications/llama-2-open-foundation-and-fine-tuned-chat-models/)
-2. [Llama 2 technical overview](https://ai.meta.com/resources/models-and-libraries/llama)
-3. [Open Innovation AI Research Community](https://ai.meta.com/llama/open-innovation-ai-research-community/)
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 
-For common questions, the FAQ can be found [here](https://ai.meta.com/llama/faq/) which will be kept up to date over time as new questions arise. 
+model_path = "$MODEL_PATH"
 
-## Original Llama
-The repo for the original llama release is in the [`llama_v1`](https://github.com/facebookresearch/llama/tree/llama_v1) branch.
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_path,
+    torch_dtype=torch.float16,
+    device_map="auto"
+)
+
+prompt = "Hello from Aura TALY Beta"
+
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+outputs = model.generate(
+    **inputs,
+    max_new_tokens=100
+)
+
+print(tokenizer.decode(outputs[0]))
+
+PYTHON
+EOF
+
+chmod +x "$ROOT_DIR/run_llama.sh"
+
+echo "[+] Creating GitHub .gitignore..."
+
+cat > "$ROOT_DIR/.gitignore" << 'EOF'
+venv/
+models/
+*.bin
+*.safetensors
+*.pth
+*.pt
+*.ckpt
+*.tar
+*.zip
+EOF
+
+echo "[+] Initializing Git repository..."
+
+cd "$ROOT_DIR"
+
+git init || true
+
+git add .
+
+git commit -m "Aura TALY Beta Unified Llama Stack" || true
+
+echo
+echo "=================================================="
+echo "INSTALLATION COMPLETED SUCCESSFULLY"
+echo "=================================================="
+echo
+echo "ROOT:"
+echo "$ROOT_DIR"
+echo
+echo "RUN MODEL:"
+echo "./run_llama.sh /path/to/model"
+echo
+echo "START VENV:"
+echo "source $ROOT_DIR/venv/bin/activate"
+echo cat > README.md << 'EOF'
+# AURA TALY BETA - LLAMA STACK
+
+Infraestructura automatizada para Meta Llama.
+
+## Instalación
+
+chmod +x setup_llama_stack.sh
+./setup_llama_stack.sh
+
+## Características
+
+- Auto descarga Llama 2/3/4
+- Integración GitHub
+- CUDA
+- HuggingFace
+- Llama Stack
+- Multimodal
+EOF
+chmod +x setup_llama_stack.sh
+./setup_llama_stack.sh
+echo "=================================================="
