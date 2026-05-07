@@ -700,3 +700,115 @@ echo
 echo "==============================================================="
 echo "           AURA TALY BETA READY"
 echo "==============================================================="
+root = true
+
+[*]
+charset = utf-8
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.java]
+ij_java_use_single_class_imports = true
+
+[*.yml]
+indent_size = 2
+#!/bin/bash
+#
+# Copyright (C) 2007 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This script is a wrapper for apktool.jar, so you can simply call "apktool",
+# instead of java -jar apktool.jar. It is heavily based on the "dx" script
+# from the Android SDK
+
+# Set up prog to be the path of this script, including following symlinks,
+# and set up progdir to be the fully-qualified pathname of its directory.
+prog="$0"
+while [ -h "${prog}" ]; do
+    newProg=`/bin/ls -ld "${prog}"`
+
+    newProg=`expr "${newProg}" : ".* -> \(.*\)$"`
+    if expr "x${newProg}" : 'x/' >/dev/null; then
+        prog="${newProg}"
+    else
+        progdir=`dirname "${prog}"`
+        prog="${progdir}/${newProg}"
+    fi
+done
+oldwd=`pwd`
+progdir=`dirname "${prog}"`
+cd "${progdir}"
+progdir=`pwd`
+prog="${progdir}"/`basename "${prog}"`
+cd "${oldwd}"
+
+jarfile=apktool.jar
+libdir="$progdir"
+if [ ! -r "$libdir/$jarfile" ]; then
+    # Find the highest version of apktool_*.jar in the directory.
+    highest_jarfile=$(ls "$libdir"/apktool_*.jar 2>/dev/null | sort -V | tail -n 1)
+    if [ -n "$highest_jarfile" ]; then
+        jarfile=$(basename "$highest_jarfile")
+    else
+        echo `basename "$prog"`": can't find $jarfile"
+        exit 1
+    fi
+fi
+
+javaOpts=""
+
+# If you want DX to have more memory when executing, uncomment the following
+# line and adjust the value accordingly. Use "java -X" for a list of options
+# you can pass here.
+#
+javaOpts="-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
+
+# Alternatively, this will extract any parameter "-Jxxx" from the command line
+# and pass them to Java (instead of to dx). This makes it possible for you to
+# add a command-line parameter such as "-JXmx256M" in your ant scripts, for
+# example.
+while expr "x$1" : 'x-J' >/dev/null; do
+    opt=`expr "$1" : '-J\(.*\)'`
+    javaOpts="${javaOpts} -${opt}"
+    shift
+done
+
+if [ "$OSTYPE" = "cygwin" ] ; then
+    jarpath=`cygpath -w  "$libdir/$jarfile"`
+else
+    jarpath="$libdir/$jarfile"
+fi
+
+# add current location to path for aapt
+PATH=$PATH:`pwd`;
+export PATH;
+exec java $javaOpts -jar "$jarpath" "$@"
+@app.websocket("/ws/chat")
+async def chat_endpoint(websocket: WebSocket, user_id: str, model: str = "openai", mode: str = "normal"):
+ await websocket.accept()
+ llm = get_llm(model, mode) # Puedes pasar info extra si quieres routing inteligente
+ while True:
+ inp = await websocket.receive_text()
+ context = get_context(vector_store, inp)
+ # Usar el LLM correcto según el routing
+ output = llm(f"{context}\nUsuario: {inp}")
+ await websocket.send_text(output)
+ # Guardar en memoria vectorial
+ vector_store.add_texts([f"User: {inp}", f"Aura: {output}"], metadatas=[{"user": user_id}])
+from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from transformers import pipeline # Para Meta Llama local
+from vertexai.language_models import ChatModel, InputOutputTextPair # GCP Vertex AI Python lib
