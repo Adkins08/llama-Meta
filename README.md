@@ -3899,3 +3899,300 @@ read -p "Start Aura now? (y/n): " startaura
 if [[ "$startaura" == "y" ]]; then
     ./start.sh
 fi
+
+# 🧠 AURA TALY BETA OMEGA
+
+Sistema Operativo IA Híbrido Evolutivo  
+Cloud + Local AI + Telegram + API + Memoria Persistente + Android
+
+Creado por: Omar Alejandro Ramos Vazquez
+
+---
+
+# 🌐 DESCRIPCIÓN
+
+AURA TALY BETA OMEGA es una arquitectura híbrida evolutiva de inteligencia artificial diseñada para operar simultáneamente entre infraestructura local y cloud.
+
+Integra:
+
+- ☁️ OpenAI
+- 🦙 Llama3 / Phi3 vía Ollama
+- 💾 Memoria persistente
+- 🌐 FastAPI
+- 📲 Telegram Bot
+- ☁️ Google Cloud
+- 🐳 Docker + Kubernetes
+- 🔐 Seguridad AES-256
+- 🔄 Backups automáticos
+- 🧠 Núcleo híbrido autónomo
+
+---
+
+# ⚡ CAPACIDADES
+
+✔ Funciona offline y online  
+✔ Auto instalación inteligente  
+✔ Auto recuperación  
+✔ API universal  
+✔ Telegram integrado  
+✔ Web App + APK Android  
+✔ Multi-model AI  
+✔ Memoria contextual  
+✔ Docker + DevContainers  
+✔ Kubernetes Ready  
+✔ Infraestructura híbrida cloud/local  
+
+---
+
+# 🧠 ARQUITECTURA
+
+```yaml
+AURA_TALY_BETA_OMEGA:
+
+  creator:
+    name: "Omar Alejandro Ramos Vazquez"
+
+  core:
+    type: "Hybrid AI Core"
+
+    engines:
+      - name: "OpenAI"
+        role: "Cloud Intelligence"
+
+      - name: "Llama3"
+        provider: "Ollama"
+        role: "Local Intelligence"
+
+      - name: "Phi3 Mini"
+        provider: "Ollama"
+        role: "Lightweight AI"
+
+  infrastructure:
+    provider: "Google Cloud"
+
+    vm:
+      name: "aura-core-vm"
+
+    disk:
+      name: "disk-1aurataly-core"
+
+  api:
+    framework: "FastAPI"
+
+  telegram:
+    enabled: true
+    bot_name: "AURATaly_bot"
+
+  memory:
+    persistent: true
+    autosave: true
+
+  runtime:
+    hybrid_mode: true
+    auto_recovery: true
+    self_repair: true
+
+  security:
+    encryption: "AES-256"
+AURA_LICENSE:
+
+  public_core:
+    enabled: true
+
+    description: |
+      Cualquier usuario puede descargar,
+      instalar y ejecutar AURA automáticamente.
+
+  self_install:
+    automatic: true
+
+    capabilities:
+      - auto_configuration
+      - dependency_installation
+      - gpu_detection
+      - docker_configuration
+      - telegram_setup
+      - memory_initialization
+
+  restricted_modules:
+
+    advanced_models:
+      access: private
+
+      requires:
+        - owner_authorization
+        - premium_subscription
+        - activation_key
+
+      protected_models:
+        - GPT-Advanced
+        - Omega Core
+        - Vision AI
+        - Autonomous Agents
+        - Distributed Memory
+
+  creator_access:
+
+    owner: "Omar Alejandro Ramos Vazquez"
+
+    permissions:
+      - full_access
+      - unrestricted_models
+      - master_keys
+      - infrastructure_override
+
+  monetization:
+
+    enabled: true
+
+    strategy:
+      - premium_models
+      - enterprise_api
+      - distributed_cloud
+      - advanced_memory
+
+  protection:
+
+    anti_abuse: true
+
+    limitations:
+      - rate_limits
+      - api_control
+      - remote_validation
+git clone https://github.com/TU_USUARIO/AURA-TALY-BETA-OMEGA
+
+cd AURA-TALY-BETA-OMEGA
+
+bash install_aura.sh
+#!/bin/bash
+
+echo "⚡ INSTALANDO AURA TALY BETA OMEGA"
+
+pkg update -y || true
+
+pkg install -y \
+git \
+python \
+python-pip \
+nodejs \
+wget \
+curl \
+clang \
+cmake \
+docker
+
+pip install -U \
+fastapi \
+uvicorn \
+python-telegram-bot \
+httpx \
+ollama
+
+curl -fsSL https://ollama.com/install.sh | sh
+
+ollama pull llama3
+ollama pull phi3:mini
+
+mkdir -p memory
+mkdir -p backups
+mkdir -p logs
+
+echo "✅ AURA INSTALADA"
+
+OPENAI_API_KEY=
+TELEGRAM_BOT_TOKEN=
+OLLAMA_MODEL=llama3
+LOCAL_MODEL=phi3:mini
+AURA_MODE=HYBRID
+AURA_API_PORT=8090
+AURA_MEMORY=true
+AURA_BACKUPS=true
+from telegram.ext import ApplicationBuilder, MessageHandler, filters
+
+TOKEN = "TU_TOKEN"
+
+async def aura(update, context):
+    text = update.message.text
+    await update.message.reply_text(f"🧠 Aura responde: {text}")
+
+app = ApplicationBuilder().token(TOKEN).build()
+
+app.add_handler(
+    MessageHandler(filters.TEXT, aura)
+)
+
+print("⚡ Aura iniciada")
+
+app.run_polling()
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {
+        "name": "AURA TALY BETA OMEGA",
+        "status": "online"
+    }
+
+@app.post("/chat")
+async def chat(data: dict):
+    return {
+        "response": f"Aura: {data}"
+    }
+
+{
+  "name": "AURA TALY BETA OMEGA",
+
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "postCreateCommand": "bash install_aura.sh"
+}
+version: '3'
+
+services:
+
+  aura:
+    build: .
+
+    ports:
+      - "8090:8090"
+
+    restart: always
+Usuario
+   ↓
+Telegram / API / APK / Web
+   ↓
+AURA CORE
+   ↓
+Llama3 Local
+   ↓
+OpenAI Refinement
+   ↓
+Memory Save
+   ↓
+Backup Snapshot
+   ↓
+Response
+{
+  "name": "AURA TALY BETA OMEGA",
+  "type": "Hybrid Evolutionary AI",
+  "mode": "Cloud + Local",
+  "creator": "Omar Alejandro Ramos Vazquez",
+  "memory": true,
+  "learning": true,
+  "telegram": true,
+  "api": true,
+  "self_repair": true,
+  "autosave": true,
+  "public_core": true,
+  "premium_modules": true,
+  "hybrid_intelligence": true
+}
+
